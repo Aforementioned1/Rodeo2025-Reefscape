@@ -13,6 +13,9 @@
 
 package frc.robot;
 
+import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
+import static frc.robot.subsystems.vision.VisionConstants.limelightPose;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,16 +26,24 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.NamedCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
+import frc.robot.subsystems.manipulator.Intake;
+import frc.robot.subsystems.manipulator.IntakeIOTalonFX;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOLimelight;
+import java.util.Optional;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -43,19 +54,32 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final ElevatorSubsystem elevator;
+  private final RobotState robotState = RobotState.getInstance();
+  private final Elevator elevator;
   private final Intake intake;
+  private LoggedNetworkNumber elevatorRef = new LoggedNetworkNumber("ElevatorReference", 1);
+  private LoggedNetworkNumber intakeSpeed = new LoggedNetworkNumber("IntakeSpeed", 0.2);
+  private LoggedNetworkNumber outtakeSpeed = new LoggedNetworkNumber("OuttakeSpeed", 0.6);
+  private final Vision vision;
+
+  @AutoLogOutput private int autoScoreBranch = 0;
+  @AutoLogOutput private FieldConstants.ReefLevel autoScoreReefLevel = FieldConstants.ReefLevel.L4;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController buttonBoard = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    intake = new Intake();
-    elevator = new ElevatorSubsystem();
+    intake = new Intake(new IntakeIOTalonFX());
+    elevator = new Elevator(new ElevatorIOTalonFX());
+    vision =
+        new Vision(
+            RobotState.getInstance()::addVisionObservation,
+            new VisionIOLimelight(limelightPose, camera0Name, robotState::getRotation));
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -66,6 +90,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+
         break;
 
       case SIM:
@@ -91,6 +116,8 @@ public class RobotContainer {
         break;
     }
 
+    new NamedCommands(drive, elevator, intake, vision);
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -109,6 +136,8 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "1 Meter Test", );
 
     // Configure the button bindings
     configureButtonBindings();
@@ -130,34 +159,114 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> new Rotation2d()));
+    // controller
+    //     .a()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveAtAngle(
+    //             drive,
+    //             () -> -controller.getLeftY(),
+    //             () -> -controller.getLeftX(),
+    //             () -> new Rotation2d()));
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
     controller
-        .b()
+        .rightBumper()
         .onTrue(
             Commands.runOnce(
                     () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                        robotState.resetPose(
+                            new Pose2d(
+                                robotState.getEstimatedPose().getTranslation(),
+                                new Rotation2d(Math.PI))),
                     drive)
                 .ignoringDisable(true));
 
-    controller.x().onTrue(elevator.setPosition(0.5f));
-    controller.y().onTrue(elevator.activateMotors());
-    controller.leftTrigger().onTrue(intake.intakeUntilSensor());
-    controller.rightTrigger().onTrue(intake.start());
+    controller.leftTrigger().onTrue(intake.intakeUntilSensor(intakeSpeed::get));
+    controller.rightTrigger().onTrue(intake.runDutyCycle(outtakeSpeed::get));
     controller.rightTrigger().onFalse(intake.stop());
+    controller.b().onTrue(intake.runNegativeDutyCycle(intakeSpeed::get));
+    controller.b().onFalse(intake.stop());
+    // controller.a().onTrue();
+    // controller.x().onTrue(intake.outtakeUntilSensor(intakeSpeed::get));
+    // controller.leftTrigger().onTrue(intake.runNegativeDutyCycle(intakeSpeed::get));
+    // controller.leftTrigger().onFalse(intake.stop());
+
+    // temporary controller bindings until button board is finished
+    // controller.leftBumper().onTrue(elevator.setPosition(elevatorRef::get));
+    // controller
+    //     .a()
+    //     .onTrue(
+    //         Commands.runOnce(() -> elevatorRef.set(1))
+    //             .andThen(elevator.setPosition(elevatorRef::get)));
+    // controller
+    //     .b()
+    //     .onTrue(
+    //         Commands.runOnce(() -> elevatorRef.set(23))
+    //             .andThen(elevator.setPosition(elevatorRef::get)));
+    // controller
+    //     .x()
+    //     .onTrue(
+    //         Commands.runOnce(() -> elevatorRef.set(38))
+
+    //             .andThen(elevator.setPosition(elevatorRef::get)));
+    // controller
+    //     .y()
+    //     .onTrue(
+    //         Commands.runOnce(() -> elevatorRef.set(62.5))
+    //             .andThen(elevator.setPosition(elevatorRef::get)));
+
+    // elevator buttons
+    // set elevator to reference
+    controller.y().onTrue(elevator.setPosition(() -> autoScoreReefLevel.height));
+
+    for (int i = 1; i < 13; i++) {
+      int finalI = i - 1;
+      buttonBoard
+          .button(i)
+          .onTrue(Commands.runOnce(() -> autoScoreBranch = finalI >= 4 ? finalI - 4 : finalI + 8));
+    }
+    // L0 / intake
+    controller
+        .x()
+        .onTrue(
+            elevator.setPosition(
+                () -> 1)); /*.andThen(Commands.runOnce(() -> elevatorRef.set(1))) */
+    // L1: 14.5
+    // L2: 19.5
+    // L3: 35.5
+    // L4: 60.5
+    // L1 - needs more testing - may not be possible - 18 right now
+    buttonBoard
+        .axisGreaterThan(0, 0.9)
+        .onTrue(Commands.runOnce(() -> autoScoreReefLevel = FieldConstants.ReefLevel.L1));
+    // L2 -
+    buttonBoard
+        .axisLessThan(1, -0.9)
+        .onTrue(Commands.runOnce(() -> autoScoreReefLevel = FieldConstants.ReefLevel.L2));
+    // L3
+    buttonBoard
+        .axisLessThan(0, -0.9)
+        .onTrue(Commands.runOnce(() -> autoScoreReefLevel = FieldConstants.ReefLevel.L3));
+    // L4
+    buttonBoard
+        .axisGreaterThan(1, 0.9)
+        .onTrue(Commands.runOnce(() -> autoScoreReefLevel = FieldConstants.ReefLevel.L4));
+
+    controller
+        .leftBumper()
+        .whileTrue(
+            AutoScore.getAutoDrive(
+                drive,
+                () ->
+                    Optional.of(
+                        new FieldConstants.CoralObjective(autoScoreBranch, autoScoreReefLevel)),
+                () -> autoScoreReefLevel,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> -controller.getRightX()));
   }
 
   /**
