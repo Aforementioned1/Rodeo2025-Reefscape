@@ -17,6 +17,7 @@ import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 import static frc.robot.subsystems.vision.VisionConstants.limelightPose;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -40,6 +41,7 @@ import frc.robot.subsystems.manipulator.Intake;
 import frc.robot.subsystems.manipulator.IntakeIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.util.AllianceFlipUtil;
 import java.util.Optional;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -55,11 +57,14 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final RobotState robotState = RobotState.getInstance();
+  private final SlewRateLimiter xLimiter = new SlewRateLimiter(10);
+  private final SlewRateLimiter yLimiter = new SlewRateLimiter(10);
+  private final SlewRateLimiter angularLimiter = new SlewRateLimiter(10);
   private final Elevator elevator;
   private final Intake intake;
   private LoggedNetworkNumber elevatorRef = new LoggedNetworkNumber("ElevatorReference", 1);
   private LoggedNetworkNumber intakeSpeed = new LoggedNetworkNumber("IntakeSpeed", 0.2);
-  private LoggedNetworkNumber outtakeSpeed = new LoggedNetworkNumber("OuttakeSpeed", 0.6);
+  private LoggedNetworkNumber outtakeSpeed = new LoggedNetworkNumber("OuttakeSpeed", 0.4);
   private final Vision vision;
 
   @AutoLogOutput private int autoScoreBranch = 0;
@@ -154,9 +159,9 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -xLimiter.calculate(controller.getLeftY()),
+            () -> -yLimiter.calculate(controller.getLeftX()),
+            () -> -angularLimiter.calculate(controller.getRightX())));
 
     // Lock to 0° when A button is held
     // controller
@@ -173,22 +178,22 @@ public class RobotContainer {
 
     // Reset gyro to 0° when B button is pressed
     controller
-        .rightBumper()
+        .povDown()
         .onTrue(
             Commands.runOnce(
                     () ->
                         robotState.resetPose(
                             new Pose2d(
-                                robotState.getEstimatedPose().getTranslation(),
-                                new Rotation2d(Math.PI))),
+                                robotState.getEstimatedPose().getTranslation(), new Rotation2d(0))),
                     drive)
                 .ignoringDisable(true));
 
     controller.leftTrigger().onTrue(intake.intakeUntilSensor(intakeSpeed::get));
     controller.rightTrigger().onTrue(intake.runDutyCycle(outtakeSpeed::get));
     controller.rightTrigger().onFalse(intake.stop());
-    controller.b().onTrue(intake.runNegativeDutyCycle(intakeSpeed::get));
-    controller.b().onFalse(intake.stop());
+    controller.a().onTrue(intake.runNegativeDutyCycle(intakeSpeed::get));
+    controller.a().onFalse(intake.stop());
+    
     // controller.a().onTrue();
     // controller.x().onTrue(intake.outtakeUntilSensor(intakeSpeed::get));
     // controller.leftTrigger().onTrue(intake.runNegativeDutyCycle(intakeSpeed::get));
@@ -258,15 +263,33 @@ public class RobotContainer {
     controller
         .leftBumper()
         .whileTrue(
-            AutoScore.getAutoDrive(
-                drive,
-                () ->
-                    Optional.of(
-                        new FieldConstants.CoralObjective(autoScoreBranch, autoScoreReefLevel)),
-                () -> autoScoreReefLevel,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> -controller.getRightX()));
+            Commands.either(
+                AutoScore.getAutoDrive( // if have a game piece, auto align
+                    drive,
+                    () ->
+                        Optional.of(
+                            new FieldConstants.CoralObjective(autoScoreBranch, autoScoreReefLevel)),
+                    () -> autoScoreReefLevel,
+                    () -> xLimiter.calculate(-controller.getLeftY()),
+                    () -> yLimiter.calculate(-controller.getLeftX()),
+                    () -> angularLimiter.calculate(-controller.getRightX())),
+                DriveCommands
+                    .joystickDriveAtAngle( // if don't have a game piece, lock to coral station
+                        drive,
+                        () -> xLimiter.calculate(-controller.getLeftY()),
+                        () -> yLimiter.calculate(-controller.getLeftX()),
+                        () -> {
+                          if (FieldConstants.CoralStation.leftRegion.inRegion(
+                              robotState.getEstimatedPose().getTranslation()))
+                            return AllianceFlipUtil.apply(
+                                FieldConstants.CoralStation.leftCenterFace.getRotation());
+                          else if (FieldConstants.CoralStation.rightRegion.inRegion(
+                              robotState.getEstimatedPose().getTranslation()))
+                            return AllianceFlipUtil.apply(
+                                FieldConstants.CoralStation.rightCenterFace.getRotation());
+                          else return robotState.getEstimatedPose().getRotation();
+                        }),
+                intake.haveAGamePiece()));
   }
 
   /**

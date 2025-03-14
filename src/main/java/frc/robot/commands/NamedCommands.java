@@ -7,6 +7,8 @@
 
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.AutoScore;
 import frc.robot.FieldConstants;
@@ -43,16 +45,7 @@ public class NamedCommands {
   }
 
   private Command getAutoScore(Optional<FieldConstants.CoralObjective> objective) {
-    DoubleSupplier elevHeight =
-        () ->
-            switch (objective
-                .map(FieldConstants.CoralObjective::reefLevel)
-                .orElse(FieldConstants.ReefLevel.L4)) {
-              case L1 -> 18;
-              case L2 -> 20;
-              case L3 -> 36;
-              case L4 -> 60;
-            };
+    DoubleSupplier elevHeight = () -> objective.get().reefLevel().height;
     return elevator
         .setPosition(elevHeight)
         .alongWith(
@@ -62,9 +55,9 @@ public class NamedCommands {
                 () ->
                     objective
                         .map(FieldConstants.CoralObjective::reefLevel)
-                        .orElse(FieldConstants.ReefLevel.L4)));
-    // .andThen(elevator.setPositionBlocking(elevHeight, Seconds.of(10000)))
-    // .andThen(intake.outtake(() -> 10))
-    // .andThen(elevator.intakeHeightBlocking());
+                        .orElse(FieldConstants.ReefLevel.L4)))
+        .andThen(elevator.setPositionBlocking(elevHeight, Seconds.of(10000)))
+        .andThen(intake.runDutyCycle(() -> 0.4))
+        .andThen(elevator.setPositionBlocking(() -> 1, Seconds.of(1000)));
   }
 }
