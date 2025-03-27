@@ -222,28 +222,34 @@
             "title": "OuttakeSpeed",
             "x": 1152.0,
             "y": 128.0,
-            "width": 128.0,
+            "width": 256.0,
             "height": 128.0,
-            "type": "Text Display",
+            "type": "Number Slider",
             "properties": {
               "topic": "OuttakeSpeed",
               "period": 0.06,
               "data_type": "double",
-              "show_submit_button": false
+              "min_value": 0.0,
+              "max_value": 1.0,
+              "divisions": 5,
+              "update_continuously": true
             }
           },
           {
             "title": "OuttakeSpeedL4",
             "x": 1152.0,
             "y": 256.0,
-            "width": 128.0,
+            "width": 256.0,
             "height": 128.0,
-            "type": "Text Display",
+            "type": "Number Slider",
             "properties": {
               "topic": "OuttakeSpeedL4",
               "period": 0.06,
               "data_type": "double",
-              "show_submit_button": false
+              "min_value": 0.0,
+              "max_value": 1.0,
+              "divisions": 5,
+              "update_continuously": true
             }
           }
         ]
