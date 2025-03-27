@@ -198,6 +198,8 @@ public class DriveToPose extends Command {
             0.0,
             1.0);
     driveErrorAbs = currentDistance;
+    driveErrorAbsFilter.calculate(driveErrorAbs);
+    driveErrorAbsDt.calculate(driveErrorAbs);
     driveController.reset(
         lastSetpointTranslation.getDistance(targetPose.getTranslation()),
         driveController.getSetpoint().velocity);
@@ -219,6 +221,8 @@ public class DriveToPose extends Command {
                 currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
     thetaErrorAbs =
         Math.abs(currentPose.getRotation().minus(targetPose.getRotation()).getRadians());
+    thetaErrorAbsFilter.calculate(thetaErrorAbs);
+    thetaErrorAbsDt.calculate(thetaErrorAbs);
     if (thetaErrorAbs < thetaController.getPositionTolerance()) thetaVelocity = 0.0;
 
     Translation2d driveVelocity =
@@ -261,6 +265,17 @@ public class DriveToPose extends Command {
         });
     Logger.recordOutput("DriveToPose/robotgiver", robot.get());
     Logger.recordOutput("DriveToPose/Goal", new Pose2d[] {targetPose});
+    Logger.recordOutput("DriveToPose/DriveErrorAbs", driveErrorAbs);
+    Logger.recordOutput("DriveToPose/ThetaErrorAbs", thetaErrorAbs);
+    Logger.recordOutput("DriveToPose/DriveErrorAbsFiltered", driveErrorAbsFilter.lastValue());
+    Logger.recordOutput("DriveToPose/ThetaErrorAbsFiltered", thetaErrorAbsFilter.lastValue());
+    Logger.recordOutput("DriveToPose/DriveErrorAbsdt", driveErrorAbsDt.getLastUnfilteredValue());
+    Logger.recordOutput("DriveToPose/ThetaErrorAbsdt", thetaErrorAbsDt.getLastUnfilteredValue());
+    Logger.recordOutput("DriveToPose/DriveErrorAbsdtFiltered", driveErrorAbsDt.getLastValue());
+    Logger.recordOutput("DriveToPose/ThetaErrorAbsdtFiltered", thetaErrorAbsDt.getLastValue());
+    Logger.recordOutput("DriveToPose/IsStuck", stuck());
+
+    Logger.recordOutput("DriveToPose/AtGoal", atGoal());
   }
 
   @Override
