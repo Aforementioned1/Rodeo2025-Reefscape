@@ -206,9 +206,13 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     controller.leftTrigger().onTrue(intake.intakeUntilSensor(intakeSpeed::get));
-    controller.rightTrigger().onTrue(Commands.either(intake.runDutyCycle(outtakeSpeed::get),
-            intake.runDutyCycle(outtakeSpeedL4::get),
-            () -> autoScoreReefLevel != FieldConstants.ReefLevel.L4));
+    controller
+        .rightTrigger()
+        .onTrue(
+            Commands.either(
+                intake.runDutyCycle(outtakeSpeed::get),
+                intake.runDutyCycle(outtakeSpeedL4::get),
+                () -> autoScoreReefLevel != FieldConstants.ReefLevel.L4));
     controller.rightTrigger().onFalse(intake.stop());
     controller.a().onTrue(intake.runNegativeDutyCycle(intakeSpeed::get));
     controller.a().onFalse(intake.stop());
