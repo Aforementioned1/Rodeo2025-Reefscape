@@ -7,49 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CagePosition2 to IJ"
+            "pathName": "CagePosition5 to EF"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "scoreCoralIL4"
+            "name": "scoreCoralEL4"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "I to LSource"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "intakeCoral"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "waitToGetCoral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LSource to J"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "scoreCoralJL4"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "J to LSource"
+            "pathName": "E to RSource"
           }
         },
         {
@@ -61,19 +31,43 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LSource to KL"
+            "pathName": "RSource to CD"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "scoreCoralKL4"
+            "name": "scoreCoralDL4"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "K to LSource"
+            "pathName": "D to RSource"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RSource to CD"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "scoreCoralCL4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "C to RSource"
           }
         }
       ]

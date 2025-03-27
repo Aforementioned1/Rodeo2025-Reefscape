@@ -45,7 +45,7 @@
     "rotation": 124.01934998982647
   },
   "reversed": false,
-  "folder": "CagePosition5 to Reef",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

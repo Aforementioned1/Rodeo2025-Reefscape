@@ -45,7 +45,7 @@
     "rotation": 62.24145939893999
   },
   "reversed": false,
-  "folder": "LSource to Reef",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": -53.67317404787977

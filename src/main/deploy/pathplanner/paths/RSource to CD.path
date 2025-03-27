@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.64775,
-        "y": 0.6904999999999996
+        "x": 1.6303278688524592,
+        "y": 0.6864241803278684
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8177499999999998,
-        "y": 1.5875
+        "x": 2.8003278688524587,
+        "y": 1.583424180327869
       },
       "isLocked": false,
       "linkedName": null
@@ -45,7 +45,7 @@
     "rotation": 59.98163257239099
   },
   "reversed": false,
-  "folder": "RSource to Reef",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 53.97262661489637

@@ -50,7 +50,7 @@
     "rotation": 53.615648184164144
   },
   "reversed": false,
-  "folder": "Reef to RSource",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
