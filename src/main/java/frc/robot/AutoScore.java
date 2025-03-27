@@ -115,7 +115,7 @@ public class AutoScore {
                         })
                     .orElseGet(() -> RobotState.getInstance().getEstimatedPose()),
             robot);
-    return driveToPose.until(driveToPose::atGoal);
+    return driveToPose.until(driveToPose::atGoal).withTimeout(10);
   }
 
   public static Command getAutoDrive(

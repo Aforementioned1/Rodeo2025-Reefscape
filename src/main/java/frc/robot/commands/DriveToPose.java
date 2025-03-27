@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -26,6 +27,8 @@ import frc.robot.util.GeomUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+
+import frc.robot.util.TimeDifferentiation;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
@@ -68,7 +71,7 @@ public class DriveToPose extends Command {
     driveMaxAccelerationTeleop.initDefault(20); // teleop
     thetaMaxVelocity.initDefault(Units.degreesToRadians(360.0));
     thetaMaxAcceleration.initDefault(8.0);
-    driveTolerance.initDefault(0.02);
+    driveTolerance.initDefault(0.03);
     thetaTolerance.initDefault(Units.degreesToRadians(3.0));
     ffMinRadius.initDefault(0.05);
     ffMaxRadius.initDefault(0.1);
@@ -83,7 +86,12 @@ public class DriveToPose extends Command {
   private final ProfiledPIDController thetaController =
       new ProfiledPIDController(
           0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0), Constants.loopPeriodSecs);
-
+  private final TimeDifferentiation driveErrorAbsDt =
+          new TimeDifferentiation().withFilter(LinearFilter.singlePoleIIR(0.1, 0.02));
+  private final TimeDifferentiation thetaErrorAbsDt =
+          new TimeDifferentiation().withFilter(LinearFilter.singlePoleIIR(0.1, 0.02));
+  private final LinearFilter driveErrorAbsFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
+  private final LinearFilter thetaErrorAbsFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
   private Translation2d lastSetpointTranslation = new Translation2d();
   private double driveErrorAbs = 0.0;
   private double thetaErrorAbs = 0.0;
@@ -275,5 +283,14 @@ public class DriveToPose extends Command {
     return running
         && Math.abs(driveErrorAbs) < driveTolerance
         && Math.abs(thetaErrorAbs) < thetaTolerance.getRadians();
+  }
+
+  public boolean stuck() {
+    if (atGoal()) return false; // If at goal, not stuck
+    // TODO tune these values
+    // If the robot is not at goal and has steady-state error, but the error is not changing, it is
+    // stuck
+    return Math.abs(driveErrorAbsDt.getLastValue()) < 0.1 && driveErrorAbs > 0.08
+            || Math.abs(thetaErrorAbsDt.getLastValue()) < 0.1 && thetaErrorAbs > 0.1;
   }
 }
