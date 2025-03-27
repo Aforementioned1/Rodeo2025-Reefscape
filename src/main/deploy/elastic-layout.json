@@ -25,7 +25,7 @@
                 "height": 128.0,
                 "type": "Number Slider",
                 "properties": {
-                  "topic": "SmartDashboard/AutoScore/xOffsetInches",
+                  "topic": "AutoScore/xOffsetInches",
                   "period": 0.06,
                   "data_type": "double",
                   "min_value": 15.0,
@@ -42,7 +42,7 @@
                 "height": 128.0,
                 "type": "Number Slider",
                 "properties": {
-                  "topic": "SmartDashboard/AutoScore/yOffsetInches",
+                  "topic": "AutoScore/yOffsetInches",
                   "period": 0.06,
                   "data_type": "double",
                   "min_value": -10.0,
@@ -223,20 +223,6 @@
               "time_display_mode": "Minutes and Seconds",
               "red_start_time": 15,
               "yellow_start_time": 30
-            }
-          },
-          {
-            "title": "ManipulatorTofDistance",
-            "x": 1024.0,
-            "y": 384.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/Manipulator/ManipulatorTofDistance",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
             }
           },
           {

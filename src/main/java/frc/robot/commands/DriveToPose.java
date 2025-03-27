@@ -25,10 +25,9 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.GeomUtil;
 import frc.robot.util.LoggedTunableNumber;
+import frc.robot.util.TimeDifferentiation;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-
-import frc.robot.util.TimeDifferentiation;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
@@ -87,9 +86,9 @@ public class DriveToPose extends Command {
       new ProfiledPIDController(
           0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0), Constants.loopPeriodSecs);
   private final TimeDifferentiation driveErrorAbsDt =
-          new TimeDifferentiation().withFilter(LinearFilter.singlePoleIIR(0.1, 0.02));
+      new TimeDifferentiation().withFilter(LinearFilter.singlePoleIIR(0.1, 0.02));
   private final TimeDifferentiation thetaErrorAbsDt =
-          new TimeDifferentiation().withFilter(LinearFilter.singlePoleIIR(0.1, 0.02));
+      new TimeDifferentiation().withFilter(LinearFilter.singlePoleIIR(0.1, 0.02));
   private final LinearFilter driveErrorAbsFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
   private final LinearFilter thetaErrorAbsFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
   private Translation2d lastSetpointTranslation = new Translation2d();
@@ -291,6 +290,6 @@ public class DriveToPose extends Command {
     // If the robot is not at goal and has steady-state error, but the error is not changing, it is
     // stuck
     return Math.abs(driveErrorAbsDt.getLastValue()) < 0.1 && driveErrorAbs > 0.08
-            || Math.abs(thetaErrorAbsDt.getLastValue()) < 0.1 && thetaErrorAbs > 0.1;
+        || Math.abs(thetaErrorAbsDt.getLastValue()) < 0.1 && thetaErrorAbs > 0.1;
   }
 }
