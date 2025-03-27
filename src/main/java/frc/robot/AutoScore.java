@@ -32,9 +32,9 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class AutoScore {
   public static final LoggedNetworkNumber xOffset =
-      new LoggedNetworkNumber("AutoScore/xOffsetInches", 18);
+      new LoggedNetworkNumber("AutoScore/xOffsetInches", 18.5);
   public static final LoggedNetworkNumber yOffset =
-      new LoggedNetworkNumber("AutoScore/yOffsetInches", -3);
+      new LoggedNetworkNumber("AutoScore/yOffsetInches", -1.25);
   public static final LoggedTunableNumber minDistanceReefClearAlgae =
       new LoggedTunableNumber("AutoScore/MinDistanceReefClearAlgae", Units.inchesToMeters(18.0));
   public static final LoggedTunableNumber minDistanceReefClear =
@@ -148,6 +148,24 @@ public class AutoScore {
                       //                      return AllianceFlipUtil.apply(goalPose);
                     })
                 .orElseGet(() -> RobotState.getInstance().getEstimatedPose()),
+        robot,
+        () ->
+            DriveCommands.getLinearVelocityFromJoysticks(
+                    driverX.getAsDouble(), driverY.getAsDouble())
+                .times(AllianceFlipUtil.shouldFlip() ? -1.0 : 1.0),
+        () -> DriveCommands.getOmegaFromJoysticks(driverOmega.getAsDouble()));
+  }
+
+  public static Command getAutoDrive(
+      Drive drive,
+      Supplier<Pose2d> pose2dSupplier,
+      DoubleSupplier driverX,
+      DoubleSupplier driverY,
+      DoubleSupplier driverOmega) {
+    Supplier<Pose2d> robot = () -> RobotState.getInstance().getEstimatedPose();
+    return new DriveToPose(
+        drive,
+        pose2dSupplier,
         robot,
         () ->
             DriveCommands.getLinearVelocityFromJoysticks(

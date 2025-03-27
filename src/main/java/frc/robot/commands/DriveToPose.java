@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.generated.TunerConstants;
@@ -29,27 +30,31 @@ import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveToPose extends Command {
-  private static final LoggedTunableNumber drivekP = new LoggedTunableNumber("DriveToPose/DrivekP");
-  private static final LoggedTunableNumber drivekD = new LoggedTunableNumber("DriveToPose/DrivekD");
-  private static final LoggedTunableNumber thetakP = new LoggedTunableNumber("DriveToPose/ThetakP");
-  private static final LoggedTunableNumber thetakD = new LoggedTunableNumber("DriveToPose/ThetakD");
-  private static final LoggedTunableNumber driveMaxVelocity =
+  public static final LoggedTunableNumber drivekP = new LoggedTunableNumber("DriveToPose/DrivekP");
+  public static final LoggedTunableNumber drivekD = new LoggedTunableNumber("DriveToPose/DrivekD");
+  public static final LoggedTunableNumber thetakP = new LoggedTunableNumber("DriveToPose/ThetakP");
+  public static final LoggedTunableNumber thetakD = new LoggedTunableNumber("DriveToPose/ThetakD");
+  public static final LoggedTunableNumber driveMaxVelocity =
       new LoggedTunableNumber("DriveToPose/DriveMaxVelocity");
-  private static final LoggedTunableNumber driveMaxVelocitySlow =
+  public static final LoggedTunableNumber driveMaxVelocityTeleop =
+      new LoggedTunableNumber("DriveToPose/DriveMaxVelocity");
+  public static final LoggedTunableNumber driveMaxVelocitySlow =
       new LoggedTunableNumber("DriveToPose/DriveMaxVelocitySlow");
-  private static final LoggedTunableNumber driveMaxAcceleration =
+  public static final LoggedTunableNumber driveMaxAcceleration =
       new LoggedTunableNumber("DriveToPose/DriveMaxAcceleration");
-  private static final LoggedTunableNumber thetaMaxVelocity =
+  public static final LoggedTunableNumber driveMaxAccelerationTeleop =
+      new LoggedTunableNumber("DriveToPose/DriveMaxAcceleration");
+  public static final LoggedTunableNumber thetaMaxVelocity =
       new LoggedTunableNumber("DriveToPose/ThetaMaxVelocity");
-  private static final LoggedTunableNumber thetaMaxAcceleration =
+  public static final LoggedTunableNumber thetaMaxAcceleration =
       new LoggedTunableNumber("DriveToPose/ThetaMaxAcceleration");
-  private static final LoggedTunableNumber driveTolerance =
+  public static final LoggedTunableNumber driveTolerance =
       new LoggedTunableNumber("DriveToPose/DriveTolerance");
-  private static final LoggedTunableNumber thetaTolerance =
+  public static final LoggedTunableNumber thetaTolerance =
       new LoggedTunableNumber("DriveToPose/ThetaTolerance");
-  private static final LoggedTunableNumber ffMinRadius =
+  public static final LoggedTunableNumber ffMinRadius =
       new LoggedTunableNumber("DriveToPose/FFMinRadius");
-  private static final LoggedTunableNumber ffMaxRadius =
+  public static final LoggedTunableNumber ffMaxRadius =
       new LoggedTunableNumber("DriveToPose/FFMaxRadius");
 
   static {
@@ -57,8 +62,10 @@ public class DriveToPose extends Command {
     drivekD.initDefault(0.0);
     thetakP.initDefault(4.0);
     thetakD.initDefault(0.0);
-    driveMaxVelocity.initDefault(10);
-    driveMaxAcceleration.initDefault(20);
+    driveMaxVelocity.initDefault(4); // auto
+    driveMaxAcceleration.initDefault(4); // auto
+    driveMaxVelocityTeleop.initDefault(10); // teleop
+    driveMaxAccelerationTeleop.initDefault(20); // teleop
     thetaMaxVelocity.initDefault(Units.degreesToRadians(360.0));
     thetaMaxAcceleration.initDefault(8.0);
     driveTolerance.initDefault(0.02);
@@ -163,6 +170,13 @@ public class DriveToPose extends Command {
       thetaController.setConstraints(
           new TrapezoidProfile.Constraints(thetaMaxVelocity.get(), thetaMaxAcceleration.get()));
       thetaController.setTolerance(thetaTolerance.get());
+    }
+
+    if (DriverStation.isTeleop() && driveMaxVelocityTeleop.hasChanged(hashCode())
+        || driveMaxAccelerationTeleop.hasChanged(hashCode())) {
+      driveController.setConstraints(
+          new TrapezoidProfile.Constraints(
+              driveMaxVelocityTeleop.get(), driveMaxAccelerationTeleop.get()));
     }
 
     // Get current pose and target pose

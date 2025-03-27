@@ -1,0 +1,91 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CagePosition7 to H"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "scoreCoralHL4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "H to LSource"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeCoral"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "waitToGetCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LSource to KL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "scoreCoralKL4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "K to LSource"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeCoral"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "waitToGetCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LSource to KL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "scoreCoralLL4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L to LSource"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

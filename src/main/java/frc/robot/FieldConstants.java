@@ -40,11 +40,11 @@ public class FieldConstants {
   public static final Region2D bottomHalf = new Region2D(0, 0, fieldLength, fieldWidth / 2.0);
 
   public enum ReefLevel {
-    L1(14.5, 0),
-    L2(19.5, -35),
-    L3(35.5, -35),
-    L4(60.5, -90);
-
+    L1(13.5, 0),
+    L2(18.5, -35),
+    L3(33.95, -35),
+    L4(60.2, -90);
+    // should be 60.5 but elevator is weird
     public final double height;
     public final double pitch;
 

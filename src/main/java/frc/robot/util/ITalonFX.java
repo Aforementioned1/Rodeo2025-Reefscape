@@ -10,6 +10,6 @@ package frc.robot.util;
 import com.ctre.phoenix6.hardware.TalonFX;
 import java.util.List;
 
-public interface HasTalonFX {
+public interface ITalonFX {
   List<TalonFX> getTalonFXs();
 }

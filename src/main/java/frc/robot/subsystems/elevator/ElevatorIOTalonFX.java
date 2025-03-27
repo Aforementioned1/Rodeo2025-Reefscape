@@ -84,8 +84,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
             new MotionMagicConfigs()
                 .withMotionMagicAcceleration(0)
                 .withMotionMagicCruiseVelocity(0)
-                .withMotionMagicExpo_kA(0.05) // 0.06
-                .withMotionMagicExpo_kV(0.07)); // 0.08
+                .withMotionMagicExpo_kA(0.05) // 0.06 old
+                .withMotionMagicExpo_kV(0.07)); // 0.08 old
     leader.getConfigurator().apply(config);
     follower.getConfigurator().apply(config);
 

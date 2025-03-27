@@ -1,5 +1,6 @@
 package frc.robot.subsystems.manipulator;
 
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.BooleanSupplier;
@@ -27,7 +28,7 @@ public class Intake extends SubsystemBase {
   //   }
 
   public Command stop() {
-    return runOnce(() -> io.stop());
+    return runOnce(io::stop);
   }
 
   @Override
@@ -38,14 +39,15 @@ public class Intake extends SubsystemBase {
 
   public Command intakeUntilSensor(DoubleSupplier dutyCycle) {
     return startEnd(() -> io.set(dutyCycle.getAsDouble()), () -> {})
-        .until(() -> io.getSensor())
-        .andThen(() -> io.stop());
+        .until(io::getSensor)
+        .andThen(io::stop);
   }
 
   public Command outtakeUntilSensor(DoubleSupplier dutyCycle) {
+    Debouncer debouncer = new Debouncer(0.1);
     return startEnd(() -> io.set(dutyCycle.getAsDouble()), () -> {})
-        .until(() -> !io.getSensor())
-        .andThen(() -> io.stop());
+        .until(() -> debouncer.calculate(!io.getSensor()))
+        .andThen(io::stop);
   }
 
   public double getDistance() {

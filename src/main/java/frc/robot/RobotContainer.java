@@ -20,6 +20,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -54,6 +55,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+
   // Subsystems
   private final Drive drive;
   private final RobotState robotState = RobotState.getInstance();
@@ -64,7 +66,7 @@ public class RobotContainer {
   private final Intake intake;
   private LoggedNetworkNumber elevatorRef = new LoggedNetworkNumber("ElevatorReference", 1);
   private LoggedNetworkNumber intakeSpeed = new LoggedNetworkNumber("IntakeSpeed", 0.2);
-  private LoggedNetworkNumber outtakeSpeed = new LoggedNetworkNumber("OuttakeSpeed", 0.4);
+  private LoggedNetworkNumber outtakeSpeed = new LoggedNetworkNumber("OuttakeSpeed", 0.45);
   private final Vision vision;
 
   @AutoLogOutput private int autoScoreBranch = 0;
@@ -76,6 +78,14 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+  private final LoggedNetworkNumber l1Offset =
+      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L1", 0);
+  private final LoggedNetworkNumber l2Offset =
+      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L2", 0);
+  private final LoggedNetworkNumber l3Offset =
+      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L3", 0);
+  private final LoggedNetworkNumber l4Offset =
+      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L4", 0);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -159,9 +169,15 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -xLimiter.calculate(controller.getLeftY()),
-            () -> -yLimiter.calculate(controller.getLeftX()),
-            () -> -angularLimiter.calculate(controller.getRightX())));
+            () ->
+                -xLimiter.calculate(
+                    Math.copySign(Math.pow(controller.getLeftY(), 2), controller.getLeftY())),
+            () ->
+                -yLimiter.calculate(
+                    Math.copySign(Math.pow(controller.getLeftX(), 2), controller.getLeftX())),
+            () ->
+                -angularLimiter.calculate(
+                    Math.copySign(Math.pow(controller.getRightX(), 2), controller.getRightX()))));
 
     // Lock to 0° when A button is held
     // controller
@@ -193,10 +209,10 @@ public class RobotContainer {
     controller.rightTrigger().onFalse(intake.stop());
     controller.a().onTrue(intake.runNegativeDutyCycle(intakeSpeed::get));
     controller.a().onFalse(intake.stop());
-    
+
     // controller.a().onTrue();
     // controller.x().onTrue(intake.outtakeUntilSensor(intakeSpeed::get));
-    // controller.leftTrigger().onTrue(intake.runNegativeDutyCycle(intakeSpeed::get));
+    // controller.leftTrig[]\ger().onTrue(intake.runNegativeDutyCycle(intakeSpeed::get));
     // controller.leftTrigger().onFalse(intake.stop());
 
     // temporary controller bindings until button board is finished
@@ -225,7 +241,18 @@ public class RobotContainer {
 
     // elevator buttons
     // set elevator to reference
-    controller.y().onTrue(elevator.setPosition(() -> autoScoreReefLevel.height));
+    controller
+        .y()
+        .onTrue(
+            elevator.setPosition(
+                () ->
+                    switch (autoScoreReefLevel) {
+                          case L1 -> l1Offset.get();
+                          case L2 -> l2Offset.get();
+                          case L3 -> l3Offset.get();
+                          case L4 -> l4Offset.get();
+                        }
+                        + autoScoreReefLevel.height));
 
     for (int i = 1; i < 13; i++) {
       int finalI = i - 1;
@@ -273,22 +300,22 @@ public class RobotContainer {
                     () -> xLimiter.calculate(-controller.getLeftY()),
                     () -> yLimiter.calculate(-controller.getLeftX()),
                     () -> angularLimiter.calculate(-controller.getRightX())),
-                DriveCommands
-                    .joystickDriveAtAngle( // if don't have a game piece, lock to coral station
-                        drive,
-                        () -> xLimiter.calculate(-controller.getLeftY()),
-                        () -> yLimiter.calculate(-controller.getLeftX()),
-                        () -> {
-                          if (FieldConstants.CoralStation.leftRegion.inRegion(
-                              robotState.getEstimatedPose().getTranslation()))
-                            return AllianceFlipUtil.apply(
-                                FieldConstants.CoralStation.leftCenterFace.getRotation());
-                          else if (FieldConstants.CoralStation.rightRegion.inRegion(
-                              robotState.getEstimatedPose().getTranslation()))
-                            return AllianceFlipUtil.apply(
-                                FieldConstants.CoralStation.rightCenterFace.getRotation());
-                          else return robotState.getEstimatedPose().getRotation();
-                        }),
+                AutoScore.getAutoDrive(
+                    drive,
+                    () -> {
+                      if (FieldConstants.CoralStation.leftRegion.inRegion(
+                          robotState.getEstimatedPose().getTranslation()))
+                        return AllianceFlipUtil.apply(FieldConstants.CoralStation.leftCenterFace)
+                            .plus(new Transform2d(0.5, 0, Rotation2d.kZero));
+                      else if (FieldConstants.CoralStation.rightRegion.inRegion(
+                          robotState.getEstimatedPose().getTranslation()))
+                        return AllianceFlipUtil.apply(FieldConstants.CoralStation.rightCenterFace)
+                            .plus(new Transform2d(0.5, 0, Rotation2d.kZero));
+                      else return robotState.getEstimatedPose();
+                    },
+                    () -> xLimiter.calculate(-controller.getLeftY()),
+                    () -> yLimiter.calculate(-controller.getLeftX()),
+                    () -> angularLimiter.calculate(-controller.getRightX())),
                 intake.haveAGamePiece()));
   }
 
@@ -300,4 +327,8 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }
+
+  //  public void teleopInit() {
+  //    DriveToPose.driveMaxAcceleration.
+  //  }
 }
