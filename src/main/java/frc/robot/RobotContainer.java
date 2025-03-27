@@ -67,6 +67,7 @@ public class RobotContainer {
   private LoggedNetworkNumber elevatorRef = new LoggedNetworkNumber("ElevatorReference", 1);
   private LoggedNetworkNumber intakeSpeed = new LoggedNetworkNumber("IntakeSpeed", 0.2);
   private LoggedNetworkNumber outtakeSpeed = new LoggedNetworkNumber("OuttakeSpeed", 0.45);
+  private LoggedNetworkNumber outtakeSpeedL4 = new LoggedNetworkNumber("OuttakeSpeedL4", 0.35);
   private final Vision vision;
 
   @AutoLogOutput private int autoScoreBranch = 0;
@@ -205,7 +206,9 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     controller.leftTrigger().onTrue(intake.intakeUntilSensor(intakeSpeed::get));
-    controller.rightTrigger().onTrue(intake.runDutyCycle(outtakeSpeed::get));
+    controller.rightTrigger().onTrue(Commands.either(intake.runDutyCycle(outtakeSpeed::get),
+            intake.runDutyCycle(outtakeSpeedL4::get),
+            () -> autoScoreReefLevel != FieldConstants.ReefLevel.L4));
     controller.rightTrigger().onFalse(intake.stop());
     controller.a().onTrue(intake.runNegativeDutyCycle(intakeSpeed::get));
     controller.a().onFalse(intake.stop());
