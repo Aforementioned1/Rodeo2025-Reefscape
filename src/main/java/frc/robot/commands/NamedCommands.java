@@ -72,7 +72,7 @@ public class NamedCommands {
                     .map(FieldConstants.CoralObjective::reefLevel)
                     .orElse(FieldConstants.ReefLevel.L4))
         .andThen(elevator.setPositionBlocking(elevHeight, Seconds.of(10000)))
-        .andThen(Commands.waitSeconds(0.15))
+        .andThen(Commands.waitSeconds(0.1))
         .andThen(intake.outtakeUntilSensor(() -> 0.3))
         .andThen(elevator.setPositionBlocking(() -> 1, Seconds.of(1000)));
   }
