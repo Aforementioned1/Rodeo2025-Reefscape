@@ -70,8 +70,12 @@ public class NamedCommands {
             () ->
                 objective
                     .map(FieldConstants.CoralObjective::reefLevel)
-                    .orElse(FieldConstants.ReefLevel.L4)).withTimeout(Seconds.of(5) /* stop auto aligning after 5 seconds*/)
-        .andThen(elevator.setPositionBlocking(elevHeight, Seconds.of(10000))) // maybe should be 10? (was the measurement originally in ms?)
+                    .orElse(FieldConstants.ReefLevel.L4))
+        .withTimeout(Seconds.of(5) /* stop auto aligning after 5 seconds*/)
+        .andThen(
+            elevator.setPositionBlocking(
+                elevHeight,
+                Seconds.of(10000))) // maybe should be 10? (was the measurement originally in ms?)
         .andThen(Commands.waitSeconds(0.1))
         .andThen(intake.outtakeUntilSensor(() -> 0.3))
         .andThen(elevator.setPositionBlocking(() -> 1, Seconds.of(1000)));

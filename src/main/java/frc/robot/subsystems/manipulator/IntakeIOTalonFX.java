@@ -68,7 +68,7 @@ public class IntakeIOTalonFX implements IntakeIO {
   }
 
   public boolean getSensor() {
-    return sensorDistance.getValueAsDouble() < 0.2;
+    return sensorDistance.getValueAsDouble() < 0.1;
   }
 
   public void stop() {
