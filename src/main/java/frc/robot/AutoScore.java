@@ -32,7 +32,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class AutoScore {
   public static final LoggedNetworkNumber xOffset =
-      new LoggedNetworkNumber("AutoScore/xOffsetInches", 18.5);
+      new LoggedNetworkNumber("AutoScore/xOffsetInches", 17.5);
   public static final LoggedNetworkNumber yOffset =
       new LoggedNetworkNumber("AutoScore/yOffsetInches", -1.25);
   public static final LoggedTunableNumber minDistanceReefClearAlgae =
