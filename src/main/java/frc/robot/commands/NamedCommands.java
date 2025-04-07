@@ -52,6 +52,17 @@ public class NamedCommands {
               Optional.of(
                   new FieldConstants.CoralObjective(coralPlacement, FieldConstants.ReefLevel.L4))));
     }
+    for (int i = 65; i <= 76; i++) {
+      int coralPlacement = 14 - (i / 65 + i % 65);
+      if (coralPlacement > 11) {
+        coralPlacement -= 12;
+      }
+      commands.put(
+          "scoreCoral" + (char) i + "L3",
+          getAutoScore(
+              Optional.of(
+                  new FieldConstants.CoralObjective(coralPlacement, FieldConstants.ReefLevel.L3))));
+    }
     commands.put("intakeCoral", intake.intakeUntilSensor(() -> 0.2));
     commands.put("waitToGetCoral", Commands.waitUntil(intake.haveAGamePiece()));
     // commands.put("intakeCoral", elevator.intakeHeight().andThen(intake.autoIntake()));
