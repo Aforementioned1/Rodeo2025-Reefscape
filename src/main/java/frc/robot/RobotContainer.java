@@ -80,13 +80,13 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
   private final LoggedNetworkNumber l1Offset =
-      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L1", 0);
+      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L1", 0.0);
   private final LoggedNetworkNumber l2Offset =
-      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L2", 0);
+      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L2", 0.0);
   private final LoggedNetworkNumber l3Offset =
-      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L3", 0);
+      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L3", 0.0);
   private final LoggedNetworkNumber l4Offset =
-      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L4", 0);
+      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L4", -0.78);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
