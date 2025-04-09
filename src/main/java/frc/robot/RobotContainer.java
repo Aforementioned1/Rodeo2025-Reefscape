@@ -19,12 +19,10 @@ import static frc.robot.subsystems.vision.VisionConstants.limelightPose;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -48,7 +46,6 @@ import frc.robot.subsystems.manipulator.IntakeIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AllianceFlipUtil;
-
 import java.util.List;
 import java.util.Optional;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -147,9 +144,11 @@ public class RobotContainer {
 
     // Set up SysId routines
     autoChooser.addOption(
-        "Drive Wheel Radius Characterization", new PathPlannerAuto(DriveCommands.wheelRadiusCharacterization(drive)));
+        "Drive Wheel Radius Characterization",
+        new PathPlannerAuto(DriveCommands.wheelRadiusCharacterization(drive)));
     autoChooser.addOption(
-        "Drive Simple FF Characterization", new PathPlannerAuto(DriveCommands.feedforwardCharacterization(drive)));
+        "Drive Simple FF Characterization",
+        new PathPlannerAuto(DriveCommands.feedforwardCharacterization(drive)));
     autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
         new PathPlannerAuto(drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward)));
@@ -157,9 +156,11 @@ public class RobotContainer {
         "Drive SysId (Quasistatic Reverse)",
         new PathPlannerAuto(drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)));
     autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", new PathPlannerAuto(drive.sysIdDynamic(SysIdRoutine.Direction.kForward)));
+        "Drive SysId (Dynamic Forward)",
+        new PathPlannerAuto(drive.sysIdDynamic(SysIdRoutine.Direction.kForward)));
     autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", new PathPlannerAuto(drive.sysIdDynamic(SysIdRoutine.Direction.kReverse)));
+        "Drive SysId (Dynamic Reverse)",
+        new PathPlannerAuto(drive.sysIdDynamic(SysIdRoutine.Direction.kReverse)));
     // autoChooser.addOption(
     //     "1 Meter Test", );
 

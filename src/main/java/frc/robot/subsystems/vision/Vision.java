@@ -178,7 +178,7 @@ public class Vision extends SubsystemBase {
 
     allTxTyObservations.values().forEach(RobotState.getInstance()::addTxTyObservation);
 
-        if (DriverStation.isDisabled() && !hasSetThrottle) {
+    if (DriverStation.isDisabled() && !hasSetThrottle) {
       for (VisionIO visionIO : io) {
         visionIO.setThrottle(200);
       }
