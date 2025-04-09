@@ -71,7 +71,7 @@ public class DriveToPose extends Command {
     thetaMaxVelocity.initDefault(Units.degreesToRadians(360.0));
     thetaMaxAcceleration.initDefault(8.0);
     driveTolerance.initDefault(0.03);
-    thetaTolerance.initDefault(0.017);
+    thetaTolerance.initDefault(0.0085);
     ffMinRadius.initDefault(0.05);
     ffMaxRadius.initDefault(0.1);
   }
