@@ -46,7 +46,7 @@ public class Intake extends SubsystemBase {
   public Command outtakeUntilSensor(DoubleSupplier dutyCycle) {
     Debouncer debouncer = new Debouncer(0.1);
     return startEnd(() -> io.set(dutyCycle.getAsDouble()), () -> {})
-        .until(() -> debouncer.calculate(!io.getSensor()))
+        .until(() -> debouncer.calculate(!io.getSensorInAuto()))
         .andThen(io::stop);
   }
 

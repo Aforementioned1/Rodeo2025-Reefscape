@@ -71,6 +71,11 @@ public class IntakeIOTalonFX implements IntakeIO {
     return sensorDistance.getValueAsDouble() < 0.20;
   }
 
+  // canrange sometimes gets stuck at ~0.19 during auto
+  public boolean getSensorInAuto() {
+    return sensorDistance.getValueAsDouble() < 0.18;
+  }
+
   public void stop() {
     intakeMotor.stopMotor();
   }

@@ -11,6 +11,10 @@ public interface IntakeIO {
     return false;
   }
 
+  default boolean getSensorInAuto() {
+    return false;
+  }
+
   default void set(double dutyCycle) {}
 
   @AutoLog
