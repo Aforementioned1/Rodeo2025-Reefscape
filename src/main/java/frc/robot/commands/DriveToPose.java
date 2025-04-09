@@ -61,7 +61,7 @@ public class DriveToPose extends Command {
 
   static {
     drivekP.initDefault(1.4);
-    drivekD.initDefault(0.0);
+    drivekD.initDefault(0.14);
     thetakP.initDefault(4.0);
     thetakD.initDefault(0.0);
     driveMaxVelocity.initDefault(5); // auto
