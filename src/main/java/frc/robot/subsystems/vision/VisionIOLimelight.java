@@ -69,6 +69,12 @@ public class VisionIOLimelight implements VisionIO {
   }
 
   @Override
+  public void setThrottle(int n) {
+    // Set the throttle for the Limelight
+    LimelightHelpers.SetThrottle(name, n);
+  }
+
+  @Override
   public void updateInputs(VisionIOInputs inputs) {
     // Update connection status based on whether an update has been seen in the last 250ms
     inputs.connected =

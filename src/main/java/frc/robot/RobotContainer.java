@@ -13,16 +13,21 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 import static frc.robot.subsystems.vision.VisionConstants.limelightPose;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -43,6 +48,8 @@ import frc.robot.subsystems.manipulator.IntakeIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.AllianceFlipUtil;
+
+import java.util.List;
 import java.util.Optional;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -57,6 +64,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 public class RobotContainer {
 
   // Subsystems
+  private boolean hasRunAutoOnceBefore = false;
   private final Drive drive;
   private final RobotState robotState = RobotState.getInstance();
   private final SlewRateLimiter xLimiter = new SlewRateLimiter(10);
@@ -78,7 +86,7 @@ public class RobotContainer {
   private final CommandXboxController buttonBoard = new CommandXboxController(1);
 
   // Dashboard inputs
-  private final LoggedDashboardChooser<Command> autoChooser;
+  private final LoggedDashboardChooser<PathPlannerAuto> autoChooser;
   private final LoggedNetworkNumber l1Offset =
       new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L1", 0.0);
   private final LoggedNetworkNumber l2Offset =
@@ -135,23 +143,23 @@ public class RobotContainer {
     new NamedCommands(drive, elevator, intake, vision);
 
     // Set up auto routines
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", buildAutoChooser(""));
 
     // Set up SysId routines
     autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+        "Drive Wheel Radius Characterization", new PathPlannerAuto(DriveCommands.wheelRadiusCharacterization(drive)));
     autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+        "Drive Simple FF Characterization", new PathPlannerAuto(DriveCommands.feedforwardCharacterization(drive)));
     autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        new PathPlannerAuto(drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward)));
     autoChooser.addOption(
         "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        new PathPlannerAuto(drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)));
     autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        "Drive SysId (Dynamic Forward)", new PathPlannerAuto(drive.sysIdDynamic(SysIdRoutine.Direction.kForward)));
     autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        "Drive SysId (Dynamic Reverse)", new PathPlannerAuto(drive.sysIdDynamic(SysIdRoutine.Direction.kReverse)));
     // autoChooser.addOption(
     //     "1 Meter Test", );
 
@@ -331,11 +339,49 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
-    return autoChooser.get().withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
-  }
 
   //  public void teleopInit() {
   //    DriveToPose.driveMaxAcceleration.
   //  }
+  public Command getAutonomousCommand() {
+    // return AutoBuilder.buildAuto("P5 first part").andThen(AutoBuilder.buildAuto("P5 second
+    // part"));
+    // return AutoBuilder.buildAuto("P2 first part").andThen(AutoBuilder.buildAuto("P2 second
+    // part"));
+    PathPlannerAuto auto = autoChooser.get();
+
+    if (hasRunAutoOnceBefore) auto = new PathPlannerAuto(autoChooser.get().getName());
+
+    hasRunAutoOnceBefore = true;
+    return vision
+        .seedPoseBeforeAuto(AllianceFlipUtil.apply(auto.getStartingPose()), Meters.of(1))
+        .andThen(auto)
+        .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
+  }
+
+  public SendableChooser<PathPlannerAuto> buildAutoChooser(String defaultAutoName) {
+    SendableChooser<PathPlannerAuto> chooser = new SendableChooser<>();
+    List<String> autoNames = AutoBuilder.getAllAutoNames();
+
+    PathPlannerAuto defaultOption = null;
+
+    for (String autoName : autoNames) {
+      PathPlannerAuto auto = new PathPlannerAuto(autoName);
+
+      if (!defaultAutoName.isEmpty() && defaultAutoName.equals(autoName)) {
+        defaultOption = auto;
+      } else {
+        chooser.addOption(autoName, auto);
+      }
+    }
+
+    if (defaultOption == null) {
+      chooser.setDefaultOption("None", new PathPlannerAuto(Commands.none()));
+    } else {
+      chooser.setDefaultOption(defaultOption.getName(), defaultOption);
+      chooser.addOption("None", new PathPlannerAuto(Commands.none()));
+    }
+
+    return chooser;
+  }
 }
