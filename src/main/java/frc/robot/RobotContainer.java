@@ -72,7 +72,7 @@ public class RobotContainer {
   private LoggedNetworkNumber elevatorRef = new LoggedNetworkNumber("ElevatorReference", 1);
   private LoggedNetworkNumber intakeSpeed = new LoggedNetworkNumber("IntakeSpeed", 0.2);
   private LoggedNetworkNumber outtakeSpeed = new LoggedNetworkNumber("OuttakeSpeed", 0.45);
-  private LoggedNetworkNumber outtakeSpeedL4 = new LoggedNetworkNumber("OuttakeSpeedL4", 0.35);
+  private LoggedNetworkNumber outtakeSpeedL4 = new LoggedNetworkNumber("OuttakeSpeedL4", 0.25);
   private final Vision vision;
 
   @AutoLogOutput private int autoScoreBranch = 0;
@@ -91,7 +91,7 @@ public class RobotContainer {
   private final LoggedNetworkNumber l3Offset =
       new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L3", 0.0);
   private final LoggedNetworkNumber l4Offset =
-      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L4", -0.78);
+      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L4", 0.0);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
