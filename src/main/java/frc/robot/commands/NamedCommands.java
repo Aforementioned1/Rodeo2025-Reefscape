@@ -82,7 +82,7 @@ public class NamedCommands {
                 objective
                     .map(FieldConstants.CoralObjective::reefLevel)
                     .orElse(FieldConstants.ReefLevel.L4))
-        .withTimeout(Seconds.of(3.5) /* stop auto aligning after 5 seconds*/)
+        .withTimeout(Seconds.of(2.5) /* stop auto aligning after 5 seconds*/)
         .andThen(
             elevator.setPositionBlocking(
                 elevHeight,
