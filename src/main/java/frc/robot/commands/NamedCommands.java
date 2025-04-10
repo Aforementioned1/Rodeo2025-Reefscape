@@ -86,8 +86,8 @@ public class NamedCommands {
         .andThen(elevator.setPositionBlocking(elevHeight, Seconds.of(2.0)))
         .andThen(Commands.waitSeconds(0.05))
         .andThen(intake.outtakeUntilSensor(() -> 0.3))
-        .andThen(elevator.setPosition(() -> 1))
-        .withTimeout(2);
+         .andThen(elevator.setPosition(() -> 1))
+         .withTimeout(2);
       // .andThen(elevator.setPositionBlocking(() -> 1, Seconds.of(1000.0)));
   }
 }
