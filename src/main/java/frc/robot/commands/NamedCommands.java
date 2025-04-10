@@ -82,12 +82,12 @@ public class NamedCommands {
                 objective
                     .map(FieldConstants.CoralObjective::reefLevel)
                     .orElse(FieldConstants.ReefLevel.L4))
-        .withTimeout(Seconds.of(2.5) /* stop auto aligning after 5 seconds*/)
+        .withTimeout(Seconds.of(5) /* stop auto aligning after (formerly) 2.5 seconds*/)
         .andThen(elevator.setPositionBlocking(elevHeight, Seconds.of(2.0)))
         .andThen(Commands.waitSeconds(0.05))
         .andThen(intake.outtakeUntilSensor(() -> 0.3))
-         .andThen(elevator.setPosition(() -> 1))
-         .withTimeout(2);
-      // .andThen(elevator.setPositionBlocking(() -> 1, Seconds.of(1000.0)));
+        // .andThen(elevator.setPosition(() -> 1))
+        // .withTimeout(2);
+    .andThen(elevator.setPositionBlocking(() -> 1, Seconds.of(2.0)));
   }
 }
