@@ -43,9 +43,9 @@ public class AutoScore {
   public static final LoggedTunableNumber minDistanceReefClear =
       new LoggedTunableNumber("AutoScore/MinDistanceReefClear", Units.inchesToMeters(12.0));
   private static final LoggedTunableNumber xOffsetL1 =
-      new LoggedTunableNumber("AutoScore/xOffsetL1Inches", 0.0); // used to be 0.5
+      new LoggedTunableNumber("AutoScore/xOffsetL1Inches", 19.35); // used to be 0.5
   private static final LoggedTunableNumber yOffsetL1 =
-      new LoggedTunableNumber("AutoScore/yOffsetL1Inches", 0.0); // used to be 0.3
+      new LoggedTunableNumber("AutoScore/yOffsetL1Inches", 1.5); // used to be 0.3
   private static final LoggedTunableNumber degreeOffsetL1 =
       new LoggedTunableNumber(
           "AutoScore/degreeOffsetL1",
