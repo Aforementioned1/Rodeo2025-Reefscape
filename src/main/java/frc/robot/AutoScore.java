@@ -34,7 +34,8 @@ public class AutoScore {
   public static final LoggedNetworkNumber xOffset =
       new LoggedNetworkNumber("AutoScore/xOffsetInches", 19.35); // 18.5 before
   public static final LoggedNetworkNumber yOffset =
-      new LoggedNetworkNumber("AutoScore/yOffsetInches", -1.25); // -1.25 before - should be -1.25-0 ish
+      new LoggedNetworkNumber(
+          "AutoScore/yOffsetInches", -1.25); // -1.25 before - should be -1.25-0 ish
   public static final LoggedNetworkNumber yOffsetL4 =
       new LoggedNetworkNumber("AutoScore/yOffsetL4Inches", 1.5); // should be 0-2.5 ish
   public static final LoggedTunableNumber minDistanceReefClearAlgae =
@@ -46,8 +47,9 @@ public class AutoScore {
   private static final LoggedTunableNumber yOffsetL1 =
       new LoggedTunableNumber("AutoScore/yOffsetL1Inches", 0.0); // used to be 0.3
   private static final LoggedTunableNumber degreeOffsetL1 =
-      new LoggedTunableNumber("AutoScore/degreeOffsetL1", 45.0); // used to be 170 - 45 seems like a reasonable number to start?
-      // CHANGE LL ANGLE IN LL CONFIG
+      new LoggedTunableNumber(
+          "AutoScore/degreeOffsetL1",
+          45.0); // used to be 170 - 45 seems like a reasonable number to start?
 
   // Radius of regular hexagon is side length
   private static final double reefRadius = Reef.faceLength;
@@ -106,18 +108,21 @@ public class AutoScore {
                     .get()
                     .map(
                         objective -> {
-                        // use L1 offsets if L1 is selected (MAY NOT WORK)
-                        if (reefLevel.get() == FieldConstants.ReefLevel.L1) {
-                            return getDriveTarget(robot.get(), AllianceFlipUtil.apply(getCoralScorePoseL1(objective)));
-                        }
+                          // use L1 offsets if L1 is selected (MAY NOT WORK)
+                          if (reefLevel.get() == FieldConstants.ReefLevel.L1) {
+                            return getDriveTarget(
+                                robot.get(),
+                                AllianceFlipUtil.apply(getCoralScorePoseL1(objective)));
+                          }
 
-                        // use L4 y offset if L4 is selected
-                        if (reefLevel.get() == FieldConstants.ReefLevel.L4) {
-                            return getDriveTarget(robot.get(),
+                          // use L4 y offset if L4 is selected
+                          if (reefLevel.get() == FieldConstants.ReefLevel.L4) {
+                            return getDriveTarget(
+                                robot.get(),
                                 AllianceFlipUtil.apply(getCoralScorePoseL4(objective)));
-                        } 
+                          }
 
-                        // default to using normal offsets
+                          // default to using normal offsets
                           Pose2d goalPose = getCoralScorePose(objective);
                           return getDriveTarget(robot.get(), AllianceFlipUtil.apply(goalPose));
                           //                      return AllianceFlipUtil.apply(goalPose);
@@ -149,14 +154,15 @@ public class AutoScore {
                     objective -> {
                       // use L1 offsets if L1 is selected (MAY NOT WORK)
                       if (reefLevel.get() == FieldConstants.ReefLevel.L1) {
-                        return getDriveTarget(robot.get(), AllianceFlipUtil.apply(getCoralScorePoseL1(objective)));
+                        return getDriveTarget(
+                            robot.get(), AllianceFlipUtil.apply(getCoralScorePoseL1(objective)));
                       }
 
                       // use L4 y offset if L4 is selected
                       if (reefLevel.get() == FieldConstants.ReefLevel.L4) {
-                        return getDriveTarget(robot.get(),
-                            AllianceFlipUtil.apply(getCoralScorePoseL4(objective)));
-                      } 
+                        return getDriveTarget(
+                            robot.get(), AllianceFlipUtil.apply(getCoralScorePoseL4(objective)));
+                      }
                       // default to using normal offsets
                       Pose2d goalPose = getCoralScorePose(objective);
                       return getDriveTarget(robot.get(), AllianceFlipUtil.apply(goalPose));
