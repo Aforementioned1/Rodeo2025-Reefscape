@@ -34,11 +34,20 @@ public class AutoScore {
   public static final LoggedNetworkNumber xOffset =
       new LoggedNetworkNumber("AutoScore/xOffsetInches", 19.35); // 18.5 before
   public static final LoggedNetworkNumber yOffset =
-      new LoggedNetworkNumber("AutoScore/yOffsetInches", -1.25); // -1.25 before
+      new LoggedNetworkNumber("AutoScore/yOffsetInches", -1.25); // -1.25 before - should be -1.25-0 ish
+  public static final LoggedNetworkNumber yOffsetL4 =
+      new LoggedNetworkNumber("AutoScore/yOffsetL4Inches", 1.5); // should be 0-2.5 ish
   public static final LoggedTunableNumber minDistanceReefClearAlgae =
       new LoggedTunableNumber("AutoScore/MinDistanceReefClearAlgae", Units.inchesToMeters(18.0));
   public static final LoggedTunableNumber minDistanceReefClear =
       new LoggedTunableNumber("AutoScore/MinDistanceReefClear", Units.inchesToMeters(12.0));
+  private static final LoggedTunableNumber xOffsetL1 =
+      new LoggedTunableNumber("AutoScore/xOffsetL1Inches", 0.0); // used to be 0.5
+  private static final LoggedTunableNumber yOffsetL1 =
+      new LoggedTunableNumber("AutoScore/yOffsetL1Inches", 0.0); // used to be 0.3
+  private static final LoggedTunableNumber degreeOffsetL1 =
+      new LoggedTunableNumber("AutoScore/degreeOffsetL1", 45.0); // used to be 170 - 45 seems like a reasonable number to start?
+      // CHANGE LL ANGLE IN LL CONFIG
 
   // Radius of regular hexagon is side length
   private static final double reefRadius = Reef.faceLength;
@@ -72,12 +81,6 @@ public class AutoScore {
   };
   private static final LoggedTunableNumber thetaToleranceEject =
       new LoggedTunableNumber("AutoScore/ThetaToleranceEject", 2.0);
-  private static final LoggedTunableNumber l1AlignOffsetX =
-      new LoggedTunableNumber("AutoScore/L1AlignOffsetX", 0.5);
-  private static final LoggedTunableNumber l1AlignOffsetY =
-      new LoggedTunableNumber("AutoScore/L1AlignOffsetY", 0.3);
-  private static final LoggedTunableNumber l1AlignOffsetDegrees =
-      new LoggedTunableNumber("AutoScore/L1AlignOffsetDegrees", 170.0);
   private static final LoggedTunableNumber minDistanceAim =
       new LoggedTunableNumber("AutoScore/MinDistanceAim", 0.2);
   private static final LoggedTunableNumber ejectTimeSeconds =
@@ -103,12 +106,18 @@ public class AutoScore {
                     .get()
                     .map(
                         objective -> {
-                          //                      if (reefLevel.get() ==
-                          // FieldConstants.ReefLevel.L1) {
-                          //                        return getDriveTarget(
-                          //                            robot.get(),
-                          // AllianceFlipUtil.apply(getL1Pose(objective)));
-                          //                      }
+                        // use L1 offsets if L1 is selected (MAY NOT WORK)
+                        if (reefLevel.get() == FieldConstants.ReefLevel.L1) {
+                            return getDriveTarget(robot.get(), AllianceFlipUtil.apply(getCoralScorePoseL1(objective)));
+                        }
+
+                        // use L4 y offset if L4 is selected
+                        if (reefLevel.get() == FieldConstants.ReefLevel.L4) {
+                            return getDriveTarget(robot.get(),
+                                AllianceFlipUtil.apply(getCoralScorePoseL4(objective)));
+                        } 
+
+                        // default to using normal offsets
                           Pose2d goalPose = getCoralScorePose(objective);
                           return getDriveTarget(robot.get(), AllianceFlipUtil.apply(goalPose));
                           //                      return AllianceFlipUtil.apply(goalPose);
@@ -138,11 +147,17 @@ public class AutoScore {
                 .get()
                 .map(
                     objective -> {
-                      //                      if (reefLevel.get() == FieldConstants.ReefLevel.L1) {
-                      //                        return getDriveTarget(
-                      //                            robot.get(),
-                      // AllianceFlipUtil.apply(getL1Pose(objective)));
-                      //                      }
+                      // use L1 offsets if L1 is selected (MAY NOT WORK)
+                      if (reefLevel.get() == FieldConstants.ReefLevel.L1) {
+                        return getDriveTarget(robot.get(), AllianceFlipUtil.apply(getCoralScorePoseL1(objective)));
+                      }
+
+                      // use L4 y offset if L4 is selected
+                      if (reefLevel.get() == FieldConstants.ReefLevel.L4) {
+                        return getDriveTarget(robot.get(),
+                            AllianceFlipUtil.apply(getCoralScorePoseL4(objective)));
+                      } 
+                      // default to using normal offsets
                       Pose2d goalPose = getCoralScorePose(objective);
                       return getDriveTarget(robot.get(), AllianceFlipUtil.apply(goalPose));
                       //                      return AllianceFlipUtil.apply(goalPose);
@@ -200,14 +215,23 @@ public class AutoScore {
         .plus(new Transform2d(0, 0, Rotation2d.k180deg));
   }
 
-  private static Pose2d getL1Pose(CoralObjective coralObjective) {
+  // alignment is different for L4 due to lean of the elevator
+  public static Pose2d getCoralScorePoseL4(CoralObjective coralObjective) {
+    return getBranchPose(coralObjective)
+        .transformBy(
+            new Transform2d(Inches.of(xOffset.get()), Inches.of(yOffsetL4.get()), Rotation2d.kZero))
+        .plus(new Transform2d(0, 0, Rotation2d.k180deg));
+  }
+
+  // L1 alignment - MAY NOT WORK
+  private static Pose2d getCoralScorePoseL1(CoralObjective coralObjective) {
     int face = coralObjective.branchId() / 2;
     return Reef.centerFaces[face].transformBy(
         new Transform2d(
-            l1AlignOffsetX.get(),
-            l1AlignOffsetY.get() * (coralObjective.branchId() % 2 == 0 ? 1.0 : -1.0),
+            Inches.of(xOffsetL1.get()),
+            Inches.of(yOffsetL1.get() * (coralObjective.branchId() % 2 == 0 ? 1.0 : -1.0)),
             Rotation2d.fromDegrees(
-                l1AlignOffsetDegrees.get() * (coralObjective.branchId() % 2 == 0 ? 1.0 : -1.0))));
+                degreeOffsetL1.get() * (coralObjective.branchId() % 2 == 0 ? 1.0 : -1.0))));
   }
 
   public static boolean withinDistanceToReef(Pose2d robot, double distance) {
