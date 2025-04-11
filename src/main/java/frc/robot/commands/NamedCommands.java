@@ -85,7 +85,7 @@ public class NamedCommands {
         .withTimeout(Seconds.of(3.5) /* stop auto aligning after (formerly) 2.5 seconds*/)
         .andThen(elevator.setPositionBlocking(elevHeight, Seconds.of(2.0)))
         .andThen(Commands.waitSeconds(0.05))
-        .andThen(intake.outtakeUntilSensor(() -> 0.3))
+        .andThen(intake.outtakeUntilSensor(() -> 0.25))
         // .andThen(elevator.setPosition(() -> 1))
         // .withTimeout(2);
         .andThen(elevator.setPositionBlocking(() -> 1, Seconds.of(1.5)));
