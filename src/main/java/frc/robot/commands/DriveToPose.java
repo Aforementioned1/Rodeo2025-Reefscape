@@ -33,6 +33,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class DriveToPose extends Command {
   public static final LoggedTunableNumber drivekP = new LoggedTunableNumber("DriveToPose/DrivekP");
+  public static final LoggedTunableNumber drivekI = new LoggedTunableNumber("DriveToPose/DrivekI");
   public static final LoggedTunableNumber drivekD = new LoggedTunableNumber("DriveToPose/DrivekD");
   public static final LoggedTunableNumber thetakP = new LoggedTunableNumber("DriveToPose/ThetakP");
   public static final LoggedTunableNumber thetakD = new LoggedTunableNumber("DriveToPose/ThetakD");
@@ -61,12 +62,13 @@ public class DriveToPose extends Command {
 
   static {
     drivekP.initDefault(1.4);
-    drivekD.initDefault(0.0);
+    drivekI.initDefault(0.0);
+    drivekD.initDefault(0.0000045);
     thetakP.initDefault(4.0);
     thetakD.initDefault(0.0);
     driveMaxVelocity.initDefault(5.0); // auto
     driveMaxAcceleration.initDefault(6.0); // auto
-    driveMaxVelocityTeleop.initDefault(100 / 25 /*for jackson*/); // teleop
+    driveMaxVelocityTeleop.initDefault(4.0); // teleop
     driveMaxAccelerationTeleop.initDefault(6.0); // teleop
     thetaMaxVelocity.initDefault(Units.degreesToRadians(360.0));
     thetaMaxAcceleration.initDefault(8.0);
@@ -164,11 +166,14 @@ public class DriveToPose extends Command {
         || thetaMaxAcceleration.hasChanged(hashCode())
         || thetaTolerance.hasChanged(hashCode())
         || drivekP.hasChanged(hashCode())
+        || drivekI.hasChanged(hashCode())
         || drivekD.hasChanged(hashCode())
         || thetakP.hasChanged(hashCode())
         || thetakD.hasChanged(hashCode())) {
       driveController.setP(drivekP.get());
+      driveController.setI(drivekI.get());
       driveController.setD(drivekD.get());
+      driveController.setIntegratorRange(-10, 10);
       driveController.setConstraints(
           new TrapezoidProfile.Constraints(driveMaxVelocity.get(), driveMaxAcceleration.get()));
       driveController.setTolerance(driveTolerance.get());

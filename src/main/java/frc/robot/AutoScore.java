@@ -32,7 +32,8 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class AutoScore {
   public static final LoggedNetworkNumber xOffset =
-      new LoggedNetworkNumber("AutoScore/xOffsetInches", 19.35); // 18.5 before
+      new LoggedNetworkNumber(
+          "AutoScore/xOffsetInches", 19.35); // 19.35 before (MIGHT NOT ACTUALLY BE INCHES?)
   public static final LoggedNetworkNumber yOffset =
       new LoggedNetworkNumber(
           "AutoScore/yOffsetInches", -1.25); // -1.25 before - should be -1.25-0 ish

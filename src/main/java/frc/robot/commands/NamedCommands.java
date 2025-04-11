@@ -72,14 +72,14 @@ public class NamedCommands {
   }
 
   private Command getAutoScore(Optional<FieldConstants.CoralObjective> objective) {
-    DoubleSupplier elevHeight;
+    DoubleSupplier elevHeight = () -> objective.get().reefLevel().height;
     // unsure whether necessary
-    if (objective.get().reefLevel().equals(FieldConstants.ReefLevel.L4)) {
-      // add 1 inch to the elevator height if L4
-      elevHeight = () -> objective.get().reefLevel().height + 1;
-    } else {
-      elevHeight = () -> objective.get().reefLevel().height;
-    }
+    // if (objective.get().reefLevel().equals(FieldConstants.ReefLevel.L4)) {
+    //   // add 1 inch to the elevator height if L4
+    //   elevHeight = () -> objective.get().reefLevel().height + 1;
+    // } else {
+    //   elevHeight = () -> objective.get().reefLevel().height;
+    // }
     return
     //        elevator.setPosition(elevHeight)
     //        .alongWith(
@@ -96,6 +96,6 @@ public class NamedCommands {
         .andThen(intake.outtakeUntilSensor(() -> 0.25))
         // .andThen(elevator.setPosition(() -> 1))
         // .withTimeout(2);
-        .andThen(elevator.setPositionBlocking(() -> 1, Seconds.of(1.5)));
+        .andThen(elevator.setPositionBlocking(() -> 1, Seconds.of(0.1)));
   }
 }
