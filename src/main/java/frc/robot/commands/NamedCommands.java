@@ -20,6 +20,9 @@ import frc.robot.subsystems.vision.Vision;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
+
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
 import lombok.Getter;
 
 public class NamedCommands {
@@ -34,6 +37,7 @@ public class NamedCommands {
     this.elevator = elevator;
     this.intake = intake;
     this.vision = vision;
+
     //    for (int i = 0; i < 12; i++) {
     //      commands.put(
     //          "scoreCoral" + i + "L4",
@@ -71,7 +75,14 @@ public class NamedCommands {
   }
 
   private Command getAutoScore(Optional<FieldConstants.CoralObjective> objective) {
-    DoubleSupplier elevHeight = () -> objective.get().reefLevel().height;
+    DoubleSupplier elevHeight; 
+    if (objective.get().reefLevel().equals(FieldConstants.ReefLevel.L4))
+    {
+      elevHeight = () -> objective.get().reefLevel().height + 1;
+    }
+    else{
+      elevHeight = () -> objective.get().reefLevel().height;
+    }
     return
     //        elevator.setPosition(elevHeight)
     //        .alongWith(
