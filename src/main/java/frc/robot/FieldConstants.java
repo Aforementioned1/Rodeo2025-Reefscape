@@ -40,7 +40,7 @@ public class FieldConstants {
   public static final Region2D bottomHalf = new Region2D(0, 0, fieldLength, fieldWidth / 2.0);
 
   public enum ReefLevel {
-    L1(13.5, 0),
+    L1(15.0, 0),
     L2(18.5, -35),
     L3(33.95, -35),
     L4(60.2, -90);

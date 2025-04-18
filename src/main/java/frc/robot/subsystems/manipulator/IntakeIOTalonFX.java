@@ -8,6 +8,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -21,6 +22,7 @@ import edu.wpi.first.units.measure.Voltage;
 public class IntakeIOTalonFX implements IntakeIO {
   private final TalonFX intakeMotor = new TalonFX(11, "rio");
   private final CANrange coolSensor = new CANrange(3, "rio");
+  private final TorqueCurrentFOC torqueRequest = new TorqueCurrentFOC(0);
   // private final TalonFX rightMotor = new TalonFX(10);
 
   private final StatusSignal<Angle> position;
@@ -74,6 +76,10 @@ public class IntakeIOTalonFX implements IntakeIO {
   // canrange sometimes gets stuck at ~0.19 during auto
   public boolean getSensorInAuto() {
     return sensorDistance.getValueAsDouble() < 0.18;
+  }
+
+  public void setTorqueCurrent(double amps) {
+    intakeMotor.setControl(torqueRequest.withOutput(amps));
   }
 
   public void stop() {

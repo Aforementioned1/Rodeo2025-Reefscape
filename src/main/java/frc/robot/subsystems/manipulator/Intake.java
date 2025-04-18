@@ -15,6 +15,10 @@ public class Intake extends SubsystemBase {
     this.io = intakeIO;
   }
 
+  public Command runTorqueCurrent(DoubleSupplier amps) {
+    return runOnce(() -> io.setTorqueCurrent(amps.getAsDouble()));
+  }
+
   public Command runDutyCycle(DoubleSupplier dutyCycle) {
     return runOnce(() -> io.set(dutyCycle.getAsDouble()));
   }
@@ -43,9 +47,22 @@ public class Intake extends SubsystemBase {
         .andThen(io::stop);
   }
 
+  public Command intakeUntilSensorCurrent(DoubleSupplier amps) {
+    return startEnd(() -> io.setTorqueCurrent(amps.getAsDouble()), () -> {})
+        .until(io::getSensor)
+        .andThen(io::stop);
+  }
+
   public Command outtakeUntilSensor(DoubleSupplier dutyCycle) {
     Debouncer debouncer = new Debouncer(0.1);
     return startEnd(() -> io.set(dutyCycle.getAsDouble()), () -> {})
+        .until(() -> debouncer.calculate(!io.getSensorInAuto()))
+        .andThen(io::stop);
+  }
+
+  public Command outtakeUntilSensorCurrent(DoubleSupplier amps) {
+    Debouncer debouncer = new Debouncer(0.1);
+    return startEnd(() -> io.setTorqueCurrent(amps.getAsDouble()), () -> {})
         .until(() -> debouncer.calculate(!io.getSensorInAuto()))
         .andThen(io::stop);
   }

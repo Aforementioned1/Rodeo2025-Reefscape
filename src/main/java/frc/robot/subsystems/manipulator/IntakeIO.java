@@ -15,6 +15,8 @@ public interface IntakeIO {
     return false;
   }
 
+  default void setTorqueCurrent(double amps) {}
+
   default void set(double dutyCycle) {}
 
   @AutoLog

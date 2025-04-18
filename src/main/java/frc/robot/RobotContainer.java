@@ -70,9 +70,17 @@ public class RobotContainer {
   private final Elevator elevator;
   private final Intake intake;
   private LoggedNetworkNumber elevatorRef = new LoggedNetworkNumber("ElevatorReference", 1);
+  private LoggedNetworkNumber intakeSpeedCurrent =
+      new LoggedNetworkNumber("IntakeSpeedCurrent", 100);
+  private LoggedNetworkNumber outtakeSpeedCurrent =
+      new LoggedNetworkNumber("OuttakeSpeedCurrent", 100);
+  private LoggedNetworkNumber outtakeSpeedL1Current =
+      new LoggedNetworkNumber("OuttakeSpeedL1Current", 100);
+  private LoggedNetworkNumber outtakeSpeedL4Current =
+      new LoggedNetworkNumber("OuttakeSpeedL4Current", (100));
   private LoggedNetworkNumber intakeSpeed = new LoggedNetworkNumber("IntakeSpeed", 0.2);
   private LoggedNetworkNumber outtakeSpeed = new LoggedNetworkNumber("OuttakeSpeed", 0.45);
-  private LoggedNetworkNumber outtakeSpeedL4 = new LoggedNetworkNumber("OuttakeSpeedL4", 0.25);
+  private LoggedNetworkNumber outtakeSpeedL4 = new LoggedNetworkNumber("OuttakeSpeedL4", (0.25));
   private final Vision vision;
 
   @AutoLogOutput private int autoScoreBranch = 0;
@@ -91,7 +99,7 @@ public class RobotContainer {
   private final LoggedNetworkNumber l3Offset =
       new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L3", 0.0);
   private final LoggedNetworkNumber l4Offset =
-      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L4", 0.0);
+      new LoggedNetworkNumber("SmartDashboard/ElevatorOffsets/L4", 1.5);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -219,16 +227,24 @@ public class RobotContainer {
         .rightTrigger()
         .onTrue(
             Commands.either(
-                intake.runDutyCycle(outtakeSpeed::get),
-                intake.runDutyCycle(outtakeSpeedL4::get),
+                Commands.either(
+                    intake.runTorqueCurrent(outtakeSpeedCurrent::get),
+                    intake.runTorqueCurrent(outtakeSpeedL1Current::get),
+                    () -> autoScoreReefLevel != FieldConstants.ReefLevel.L1),
+                intake.runTorqueCurrent(outtakeSpeedL4Current::get),
                 () -> autoScoreReefLevel != FieldConstants.ReefLevel.L4));
+    // Commands.either(
+    //     intake.runDutyCycle(outtakeSpeed::get),
+    //     intake.runDutyCycle(outtakeSpeedL4::get),
+    //     () -> autoScoreReefLevel != FieldConstants.ReefLevel.L4));
     controller.rightTrigger().onFalse(intake.stop());
-    controller.a().onTrue(intake.runNegativeDutyCycle(intakeSpeed::get));
+    controller.a().onTrue(intake.runTorqueCurrent(() -> -intakeSpeedCurrent.get()));
+    // controller.a().onTrue(intake.runDutyCycle(() -> -intakeSpeed.get()));
     controller.a().onFalse(intake.stop());
 
     // controller.a().onTrue();
     // controller.x().onTrue(intake.outtakeUntilSensor(intakeSpeed::get));
-    // controller.leftTrig[]\ger().onTrue(intake.runNegativeDutyCycle(intakeSpeed::get));
+    // controller.leftTrigger().onTrue(intake.runNegativeDutyCycle(intakeSpeed::get));
     // controller.leftTrigger().onFalse(intake.stop());
 
     // temporary controller bindings until button board is finished

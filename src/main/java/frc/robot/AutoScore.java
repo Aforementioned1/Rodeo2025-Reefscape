@@ -38,19 +38,17 @@ public class AutoScore {
       new LoggedNetworkNumber(
           "AutoScore/yOffsetInches", -1.25); // -1.25 before - should be -1.25-0 ish
   public static final LoggedNetworkNumber yOffsetL4 =
-      new LoggedNetworkNumber("AutoScore/yOffsetL4Inches", 1.5); // should be 0-2.5 ish
+      new LoggedNetworkNumber("AutoScore/yOffsetL4Inches", 0.75); // should be 0-2.5 ish
   public static final LoggedTunableNumber minDistanceReefClearAlgae =
       new LoggedTunableNumber("AutoScore/MinDistanceReefClearAlgae", Units.inchesToMeters(18.0));
   public static final LoggedTunableNumber minDistanceReefClear =
       new LoggedTunableNumber("AutoScore/MinDistanceReefClear", Units.inchesToMeters(12.0));
-  private static final LoggedTunableNumber xOffsetL1 =
-      new LoggedTunableNumber("AutoScore/xOffsetL1Inches", 19.35); // used to be 0.5
-  private static final LoggedTunableNumber yOffsetL1 =
-      new LoggedTunableNumber("AutoScore/yOffsetL1Inches", 1.5); // used to be 0.3
-  private static final LoggedTunableNumber degreeOffsetL1 =
-      new LoggedTunableNumber(
-          "AutoScore/degreeOffsetL1",
-          45.0); // used to be 170 - 45 seems like a reasonable number to start?
+  public static final LoggedTunableNumber xOffsetL1 =
+      new LoggedTunableNumber("AutoScore/xOffsetL1Meters", 0.6);
+  public static final LoggedTunableNumber yOffsetL1 =
+      new LoggedTunableNumber("AutoScore/yOffsetL1Inches", Units.inchesToMeters(0.0));
+  public static final LoggedTunableNumber degreeOffsetL1 =
+      new LoggedTunableNumber("AutoScore/degreeOffsetL1", 150.0);
 
   // Radius of regular hexagon is side length
   private static final double reefRadius = Reef.faceLength;
@@ -232,13 +230,20 @@ public class AutoScore {
 
   // L1 alignment - MAY NOT WORK
   private static Pose2d getCoralScorePoseL1(CoralObjective coralObjective) {
+    // int face = coralObjective.branchId() / 2;
+    // return Reef.centerFaces[face].transformBy(
+    //     new Transform2d(
+    //         Inches.of(xOffsetL1.get()),
+    //         Inches.of(yOffsetL1.get() * (coralObjective.branchId() % 2 == 0 ? 1.0 : -1.0)),
+    //         Rotation2d.fromDegrees(
+    //             degreeOffsetL1.get() * (coralObjective.branchId() % 2 == 0 ? 1.0 : -1.0))));
     int face = coralObjective.branchId() / 2;
     return Reef.centerFaces[face].transformBy(
         new Transform2d(
-            Inches.of(xOffsetL1.get()),
-            Inches.of(yOffsetL1.get() * (coralObjective.branchId() % 2 == 0 ? 1.0 : -1.0)),
+            xOffsetL1.get(),
+            yOffsetL1.get() * (coralObjective.branchId() % 2 == 0 ? 1.0 : 1.0),
             Rotation2d.fromDegrees(
-                degreeOffsetL1.get() * (coralObjective.branchId() % 2 == 0 ? 1.0 : -1.0))));
+                degreeOffsetL1.get() * (coralObjective.branchId() % 2 == 0 ? 1.0 : 1.0))));
   }
 
   public static boolean withinDistanceToReef(Pose2d robot, double distance) {
