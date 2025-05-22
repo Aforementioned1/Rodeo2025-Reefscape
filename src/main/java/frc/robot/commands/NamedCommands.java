@@ -64,8 +64,8 @@ public class NamedCommands {
               Optional.of(
                   new FieldConstants.CoralObjective(coralPlacement, FieldConstants.ReefLevel.L3))));
     }
-    // commands.put("intakeCoral", intake.intakeUntilSensor(() -> 0.2));
-    commands.put("intakeCoral", intake.intakeUntilSensorCurrent(() -> 100));
+    commands.put("intakeCoral", intake.intakeUntilSensor(() -> 0.2));
+    // commands.put("intakeCoral", intake.intakeUntilSensorCurrent(() -> 100));
     commands.put("waitToGetCoral", Commands.waitUntil(intake.haveAGamePiece()));
     // commands.put("intakeCoral", elevator.intakeHeight().andThen(intake.autoIntake()));
 
@@ -94,8 +94,8 @@ public class NamedCommands {
         .withTimeout(Seconds.of(3.5) /* stop auto aligning after (formerly) 2.5 seconds*/)
         .andThen(elevator.setPositionBlocking(elevHeight, Seconds.of(2.0)))
         .andThen(Commands.waitSeconds(0.05))
-        // .andThen(intake.outtakeUntilSensor(() -> 0.25))
-        .andThen(intake.outtakeUntilSensorCurrent(() -> 100))
+        .andThen(intake.outtakeUntilSensor(() -> 0.25))
+        // .andThen(intake.outtakeUntilSensorCurrent(() -> 100))
         // .andThen(elevator.setPosition(() -> 1))
         // .withTimeout(2);
         .andThen(elevator.setPositionBlocking(() -> 1, Seconds.of(0.1)));

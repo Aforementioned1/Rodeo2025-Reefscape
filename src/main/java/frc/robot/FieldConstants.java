@@ -43,7 +43,7 @@ public class FieldConstants {
     L1(15.0, 0),
     L2(18.5, -35),
     L3(33.95, -35),
-    L4(60.2, -90);
+    L4(59.2, -90); // used to be 60.2
     // should be 60.5 but elevator is weird
     public final double height;
     public final double pitch;
